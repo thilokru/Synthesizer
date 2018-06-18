@@ -71,20 +71,46 @@ object Generators {
 
     private fun generateGenerator(frequency: Double, noteID: Int) {
         for (i in -2..3) {
-            tones[noteID + i * 12] = generateGuitarGenerators(frequency * Math.pow(2.0, i.toDouble()))
+            tones[noteID + i * 12] = generateBeeper(frequency * Math.pow(2.0, i.toDouble()))
         }
     }
 
     private fun generateGuitarGenerators(frequency: Double): WaveformGenerator {
-        return KeyboardHitControl(SpectrumGenerator(VibratoFrequencyFunction(0.0002, 0.1, 6.0, frequency), keyboardSpectrum), 0.02f, 2f, 0.1f)
+        val wave = AdderGenerator()
+        keyboardSpectrum.forEach {
+            val generator = SineGenerator()
+            generator.link("frequency", ConstantGenerator(frequency * it.key))
+            val const = ConstantGenerator(it.value)
+            val controlled = VolumeControl()
+            controlled.link("volume", const)
+            controlled.link("waveform", generator)
+            wave.link(it.key.toString(), controlled)
+        }
+
+        val volume = HitVolumeControl(0.02f, 2f, 0.1f, 0.0f)
+
+        val mixer = VolumeControl()
+        mixer.link("volume", volume)
+        mixer.link("waveform", wave)
+
+        return mixer
     }
 
-    private fun generateKeyboardGenerators(frequency: Double): WaveformGenerator {
+    /*private fun generateKeyboardGenerators(frequency: Double): WaveformGenerator {
         return KeyboardHitControl(KeyboardSpectrum(frequency))
-    }
+    }*/
 
     private fun generateBeeper(frequency: Double): WaveformGenerator {
-        return KeyboardHitControl(SquarewaveGenerator(VibratoFrequencyFunction(0.00005, 0.1, 6.0, frequency)), 0.01f, Float.POSITIVE_INFINITY, 0.1f)
+        val square = SquarewaveGenerator()
+        square.link("frequency", ConstantGenerator(frequency))
+
+        val volume = HitVolumeControl(0.01f, 0.3f, 0.1f, 0.3f)
+
+        val mixer = VolumeControl()
+        mixer.link("volume", volume)
+        mixer.link("waveform", square)
+
+        return mixer
     }
 
     fun getByNote(note: Int): WaveformGenerator? {

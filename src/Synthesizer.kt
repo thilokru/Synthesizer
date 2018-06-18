@@ -30,8 +30,10 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
         }
     }).start()
 
-    private fun updateGenerators() = activeGenerators.toList().forEach {
-        it.update(getTimeStamp(), this)
+    private fun updateGenerators() = (activeGenerators.clone() as ArrayList<WaveformGenerator>).forEach {
+        if (it.update(getTimeStamp(), this)) {
+            activeGenerators.remove(it)
+        }
     }
 
     private fun writeWaveform() {

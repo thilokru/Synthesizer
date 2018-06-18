@@ -1,4 +1,4 @@
-class SquarewaveGenerator() : WaveformGenerator {
+class SineGenerator : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
 
@@ -18,10 +18,7 @@ class SquarewaveGenerator() : WaveformGenerator {
             if (!active)
                 0.0
             val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            if (phase > Math.PI)
-                1.0
-            else
-                -1.0
+            Math.sin(phase)
         }
     }
 
