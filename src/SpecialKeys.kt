@@ -5,6 +5,8 @@ object SpecialKeys {
     val handlers = HashMap<Int, Handler>()
     private var isMoll = false
     private var isSept = false
+    var increase = false
+        private set
     internal var isVibrato = false
 
     init {
@@ -92,6 +94,14 @@ object SpecialKeys {
                 synthesizer.recorder.recording = false
                 synthesizer.recorder.playback = !synthesizer.recorder.playback
             }
+        }
+        handlers[KeyEvent.VK_CAPS_LOCK] = object : Handler {
+            override fun keyUp(synthesizer: Synthesizer) {
+                increase = !increase
+                println(increase)
+            }
+
+            override fun keyDown(synthesizer: Synthesizer) {}
         }
     }
 

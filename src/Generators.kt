@@ -94,7 +94,7 @@ object Generators {
     operator fun get(keyCode: Int): WaveformGenerator? {
         var noteID = mapping[keyCode]
         if (noteID != null) {
-            noteID += transposition
+            noteID += transposition + if (SpecialKeys.increase) 12 else 0
             return tones[noteID]
         }
         return null

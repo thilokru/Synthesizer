@@ -22,7 +22,7 @@ class LoopRecorder {
     var waitingForTrigger = false
     var playback = false
 
-    public fun registerEvent(event: KeyEvent) {
+    fun registerEvent(event: KeyEvent) {
         if (!recording)
             if (waitingForTrigger) {
                 waitingForTrigger = false
@@ -37,7 +37,7 @@ class LoopRecorder {
         list.add(event)
     }
 
-    public fun update() {
+    fun update() {
         currentTime++
         if (currentTime >= loopLength) {
             if (extendingEnabled && recording) {
