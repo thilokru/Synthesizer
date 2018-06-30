@@ -1,4 +1,4 @@
-class SquarewaveGenerator() : WaveformGenerator {
+class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
 
@@ -18,7 +18,7 @@ class SquarewaveGenerator() : WaveformGenerator {
             if (!active)
                 0.0
             val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            if (phase > Math.PI)
+            if (phase < Math.PI * (highTime / 0.5))
                 1.0
             else
                 -1.0
@@ -29,11 +29,13 @@ class SquarewaveGenerator() : WaveformGenerator {
 
     override fun hit(timeStamp: Double, synth: Synthesizer) {
         this.active = true
+        frequencyFunction.hit(timeStamp, synth)
     }
 
     override fun release(timeStamp: Double, synth: Synthesizer) {
         this.active = false
+        frequencyFunction.release(timeStamp, synth)
     }
 
-    override fun update(timeStamp: Double, synth: Synthesizer) = false
+    override fun update(timeStamp: Double, synth: Synthesizer) = frequencyFunction.update(timeStamp, synth)
 }

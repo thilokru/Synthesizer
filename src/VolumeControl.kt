@@ -32,6 +32,6 @@ class VolumeControl : WaveformGenerator {
     }
 
     override fun validate(): Boolean {
-        return ::waveformFunction.isInitialized && ::volumeFunction.isInitialized
+        return ::waveformFunction.isInitialized && ::volumeFunction.isInitialized && waveformFunction.validate() && volumeFunction.validate()
     }
 }

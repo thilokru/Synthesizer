@@ -1,4 +1,4 @@
-class SineGenerator : WaveformGenerator {
+class TriangleGenerator() : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
 
@@ -18,7 +18,7 @@ class SineGenerator : WaveformGenerator {
             if (!active)
                 0.0
             val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            Math.sin(phase)
+            Math.abs(2*(Math.PI-phase)/Math.PI) - 1
         }
     }
 

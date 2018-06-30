@@ -1,5 +1,8 @@
-class SineGenerator : WaveformGenerator {
+import java.lang.Math.*
 
+class NoiseGenerator(val sequenceLength: Int): WaveformGenerator { //rec: Math.pow(2.0, 12.0).toInt()
+
+    private val random = DoubleArray(sequenceLength){ random() * 2 - 1}
     private lateinit var frequencyFunction: WaveformGenerator
 
     override fun link(linkType: String, generator: WaveformGenerator) {
@@ -17,8 +20,9 @@ class SineGenerator : WaveformGenerator {
         return DoubleArray(size = resultLength) {
             if (!active)
                 0.0
-            val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            Math.sin(phase)
+            val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * PI) % (2 * PI)
+            val index = (sequenceLength * (phase % (2 * PI)) / (2 * PI)).toInt()
+            random[index]
         }
     }
 
@@ -26,13 +30,11 @@ class SineGenerator : WaveformGenerator {
 
     override fun hit(timeStamp: Double, synth: Synthesizer) {
         this.active = true
-        frequencyFunction.hit(timeStamp, synth)
     }
 
     override fun release(timeStamp: Double, synth: Synthesizer) {
         this.active = false
-        frequencyFunction.release(timeStamp, synth)
     }
 
-    override fun update(timeStamp: Double, synth: Synthesizer) = frequencyFunction.update(timeStamp, synth)
+    override fun update(timeStamp: Double, synth: Synthesizer) = false
 }

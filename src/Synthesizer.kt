@@ -25,8 +25,8 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
 
     fun startup() = Thread(Runnable {
         while (!shutdown) {
-            updateGenerators()
             writeWaveform()
+            updateGenerators()
         }
     }).start()
 

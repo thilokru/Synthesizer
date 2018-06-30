@@ -71,7 +71,7 @@ object Generators {
 
     private fun generateGenerator(frequency: Double, noteID: Int) {
         for (i in -2..3) {
-            tones[noteID + i * 12] = generateBeeper(frequency * Math.pow(2.0, i.toDouble()))
+            tones[noteID + i * 12] = generateGuitarGenerators(frequency * Math.pow(2.0, i.toDouble()))
         }
     }
 
@@ -101,10 +101,23 @@ object Generators {
     }*/
 
     private fun generateBeeper(frequency: Double): WaveformGenerator {
-        val square = SquarewaveGenerator()
-        square.link("frequency", ConstantGenerator(frequency))
+        val baseFrequency = ConstantGenerator(frequency)
+        val variance = SineGenerator()
+        variance.link("frequency", ConstantGenerator(6.0))
+        val vibratoIncrease = VolumeControl()
+        vibratoIncrease.link("volume", HitVolumeControl(2f, Float.POSITIVE_INFINITY, 0f, 0f))
+        vibratoIncrease.link("waveform", variance)
+        val dampenedVibrato = VolumeControl()
+        dampenedVibrato.link("volume", ConstantGenerator(0.0001 * (hsc - 1) * frequency))
+        dampenedVibrato.link("waveform", vibratoIncrease)
+        val resultingFrequency = AdditionGenerator()
+        resultingFrequency.link("input1", baseFrequency)
+        resultingFrequency.link("input2", dampenedVibrato)
 
-        val volume = HitVolumeControl(0.01f, 0.3f, 0.1f, 0.3f)
+        val square = TriangleGenerator()
+        square.link("frequency", resultingFrequency)
+
+        val volume = HitVolumeControl(0.01f, 0.5f, 0.1f, 0.3f)
 
         val mixer = VolumeControl()
         mixer.link("volume", volume)
