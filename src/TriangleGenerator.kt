@@ -16,23 +16,17 @@ class TriangleGenerator() : WaveformGenerator {
     override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
         val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
         return DoubleArray(size = resultLength) {
-            if (!active)
-                return@DoubleArray 0.0
             val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
             return@DoubleArray Math.abs(2*(Math.PI-phase)/Math.PI) - 1
         }
     }
 
-    private var active = false
-
     override fun hit(timeStamp: Double, synth: Synthesizer) {
-        this.active = true
         this.lastHitTime = timeStamp
         frequencyFunction.hit(timeStamp, synth)
     }
 
     override fun release(timeStamp: Double, synth: Synthesizer) {
-        this.active = false
         frequencyFunction.release(timeStamp, synth)
     }
 
