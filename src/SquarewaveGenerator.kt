@@ -1,6 +1,7 @@
 class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
+    private var lastHitTime: Double = 0.0
 
     override fun link(linkType: String, generator: WaveformGenerator) {
         if (linkType.toLowerCase() == "frequency") {
@@ -16,12 +17,12 @@ class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
         val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
         return DoubleArray(size = resultLength) {
             if (!active)
-                0.0
-            val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
+                return@DoubleArray 0.0
+            val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
             if (phase < Math.PI * (highTime / 0.5))
-                1.0
+                return@DoubleArray 1.0
             else
-                -1.0
+                return@DoubleArray -1.0
         }
     }
 
@@ -29,6 +30,7 @@ class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
 
     override fun hit(timeStamp: Double, synth: Synthesizer) {
         this.active = true
+        this.lastHitTime = timeStamp
         frequencyFunction.hit(timeStamp, synth)
     }
 

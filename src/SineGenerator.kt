@@ -1,6 +1,7 @@
 class SineGenerator : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
+    private var lastHitTime: Double = 0.0
 
     override fun link(linkType: String, generator: WaveformGenerator) {
         if (linkType.toLowerCase() == "frequency") {
@@ -15,10 +16,11 @@ class SineGenerator : WaveformGenerator {
     override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
         val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
         return DoubleArray(size = resultLength) {
-            if (!active)
-                0.0
-            val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            Math.sin(phase)
+            if (!active) {
+                return@DoubleArray 0.0
+            }
+            val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
+            return@DoubleArray Math.sin(phase)
         }
     }
 
@@ -26,6 +28,7 @@ class SineGenerator : WaveformGenerator {
 
     override fun hit(timeStamp: Double, synth: Synthesizer) {
         this.active = true
+        this.lastHitTime = timeStamp
         frequencyFunction.hit(timeStamp, synth)
     }
 

@@ -71,7 +71,7 @@ object Generators {
 
     private fun generateGenerator(frequency: Double, noteID: Int) {
         for (i in -2..3) {
-            tones[noteID + i * 12] = generateGuitarGenerators(frequency * Math.pow(2.0, i.toDouble()))
+            tones[noteID + i * 12] = generateBeeper(frequency * Math.pow(2.0, i.toDouble()))
         }
     }
 
@@ -102,20 +102,9 @@ object Generators {
 
     private fun generateBeeper(frequency: Double): WaveformGenerator {
         val baseFrequency = ConstantGenerator(frequency)
-        val variance = SineGenerator()
-        variance.link("frequency", ConstantGenerator(6.0))
-        val vibratoIncrease = VolumeControl()
-        vibratoIncrease.link("volume", HitVolumeControl(2f, Float.POSITIVE_INFINITY, 0f, 0f))
-        vibratoIncrease.link("waveform", variance)
-        val dampenedVibrato = VolumeControl()
-        dampenedVibrato.link("volume", ConstantGenerator(0.0001 * (hsc - 1) * frequency))
-        dampenedVibrato.link("waveform", vibratoIncrease)
-        val resultingFrequency = AdditionGenerator()
-        resultingFrequency.link("input1", baseFrequency)
-        resultingFrequency.link("input2", dampenedVibrato)
 
-        val square = TriangleGenerator()
-        square.link("frequency", resultingFrequency)
+        val square = SquarewaveGenerator(0.5f)
+        square.link("frequency", buildVibrato(baseFrequency, 0.001 * (hsc - 1) * frequency))
 
         val volume = HitVolumeControl(0.01f, 0.5f, 0.1f, 0.3f)
 
@@ -124,6 +113,24 @@ object Generators {
         mixer.link("waveform", square)
 
         return mixer
+    }
+
+    private fun buildVibrato(frequencyNode: WaveformGenerator, vibratoIntensity: Double, attackTime: Float = 0.5f, variationFrequency: Double = 6.0): WaveformGenerator {
+        val variance = SineGenerator()
+        variance.link("frequency", ConstantGenerator(variationFrequency))
+        val vibratoIncrease = VolumeControl()
+        vibratoIncrease.link("volume", HitVolumeControl(attackTime, Float.POSITIVE_INFINITY, 0f, 0f))
+        vibratoIncrease.link("waveform", variance)
+        val dampenedVibrato = VolumeControl()
+        dampenedVibrato.link("volume", ConstantGenerator(vibratoIntensity))
+        dampenedVibrato.link("waveform", vibratoIncrease)
+        val toggledVibrato = VolumeControl()
+        toggledVibrato.link("volume", LogicNode { _ -> if(SpecialKeys.isVibrato) 1.0 else 0.0})
+        toggledVibrato.link("waveform", dampenedVibrato)
+        val resultingFrequency = AdditionGenerator()
+        resultingFrequency.link("input1", frequencyNode)
+        resultingFrequency.link("input2", toggledVibrato)
+        return resultingFrequency
     }
 
     fun getByNote(note: Int): WaveformGenerator? {

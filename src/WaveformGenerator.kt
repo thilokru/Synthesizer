@@ -1,6 +1,8 @@
 interface WaveformGenerator {
 
     /**
+     * Important Note: Please generate all signals relative to the last hit time. Otherwise it will not work
+     * with frequency shifting effects like vibrato.
      * @arg timeStamp: The current time in seconds
      * @return the amplitude of the signal at that time.
      */
