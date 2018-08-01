@@ -1,3 +1,5 @@
+package com.mhfs.synth
+
 class VolumeControl : WaveformGenerator {
 
     private lateinit var volumeFunction: WaveformGenerator

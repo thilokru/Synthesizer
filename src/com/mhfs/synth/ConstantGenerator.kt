@@ -1,3 +1,5 @@
+package com.mhfs.synth
+
 class ConstantGenerator(private val value: Double) : WaveformGenerator {
     override fun generate(timeStamp: Double, dT: Double, resultLength: Int) = DoubleArray(resultLength) { value }
 

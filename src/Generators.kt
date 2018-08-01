@@ -1,3 +1,4 @@
+import com.mhfs.synth.*
 import java.awt.event.KeyEvent
 
 object Generators {
@@ -79,7 +80,7 @@ object Generators {
         val wave = AdderGenerator()
         keyboardSpectrum.forEach {
             val generator = SineGenerator()
-            generator.link("frequency", ConstantGenerator(frequency * it.key))
+            generator.link("frequency", buildVibrato(ConstantGenerator(frequency * it.key), 0.001 * (hsc - 1) * frequency * it.key))
             val const = ConstantGenerator(it.value)
             val controlled = VolumeControl()
             controlled.link("volume", const)
@@ -96,7 +97,7 @@ object Generators {
         return mixer
     }
 
-    /*private fun generateKeyboardGenerators(frequency: Double): WaveformGenerator {
+    /*private fun generateKeyboardGenerators(frequency: Double): com.mhfs.synth.WaveformGenerator {
         return KeyboardHitControl(KeyboardSpectrum(frequency))
     }*/
 
@@ -125,9 +126,9 @@ object Generators {
         dampenedVibrato.link("volume", ConstantGenerator(vibratoIntensity))
         dampenedVibrato.link("waveform", vibratoIncrease)
         val toggledVibrato = VolumeControl()
-        toggledVibrato.link("volume", LogicNode { _ -> if(SpecialKeys.isVibrato) 1.0 else 0.0})
+        toggledVibrato.link("volume", LogicNode { _ -> if (SpecialKeys.isVibrato) 1.0 else 0.0 })
         toggledVibrato.link("waveform", dampenedVibrato)
-        val resultingFrequency = AdditionGenerator()
+        val resultingFrequency = AdderGenerator()
         resultingFrequency.link("input1", frequencyNode)
         resultingFrequency.link("input2", toggledVibrato)
         return resultingFrequency

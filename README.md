@@ -1,7 +1,7 @@
 A simple Kotlin audio synthesizer
 
 Features:
--Synthesizer
+-com.mhfs.synth.Synthesizer
 -Loop recorder
 -Keyboard mappings for german layout
 -programmable sounds

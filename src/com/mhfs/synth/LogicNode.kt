@@ -1,3 +1,8 @@
+package com.mhfs.synth
+
+import com.mhfs.synth.Synthesizer
+import com.mhfs.synth.WaveformGenerator
+
 class LogicNode(val data: (time: Double) -> Double): WaveformGenerator {
     override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
         return DoubleArray(resultLength) {data(timeStamp + it * dT)}

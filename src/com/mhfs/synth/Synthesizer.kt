@@ -1,3 +1,5 @@
+package com.mhfs.synth
+
 import java.nio.ByteBuffer
 import javax.sound.sampled.*
 import kotlin.concurrent.thread

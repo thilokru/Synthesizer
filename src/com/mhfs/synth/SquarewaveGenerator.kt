@@ -1,4 +1,6 @@
-class TriangleGenerator() : WaveformGenerator {
+package com.mhfs.synth
+
+class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
     private var lastHitTime: Double = 0.0
@@ -17,7 +19,10 @@ class TriangleGenerator() : WaveformGenerator {
         val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
         return DoubleArray(size = resultLength) {
             val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            return@DoubleArray Math.abs(2*(Math.PI-phase)/Math.PI) - 1
+            if (phase < Math.PI * (highTime / 0.5))
+                return@DoubleArray 1.0
+            else
+                return@DoubleArray -1.0
         }
     }
 

@@ -1,3 +1,4 @@
+import com.mhfs.synth.Synthesizer
 import java.awt.event.KeyEvent
 
 object SpecialKeys {

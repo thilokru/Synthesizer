@@ -1,4 +1,6 @@
-class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
+package com.mhfs.synth
+
+class SineGenerator : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
     private var lastHitTime: Double = 0.0
@@ -17,10 +19,7 @@ class SquarewaveGenerator(private val highTime: Float) : WaveformGenerator {
         val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
         return DoubleArray(size = resultLength) {
             val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            if (phase < Math.PI * (highTime / 0.5))
-                return@DoubleArray 1.0
-            else
-                return@DoubleArray -1.0
+            return@DoubleArray Math.sin(phase)
         }
     }
 

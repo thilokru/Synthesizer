@@ -1,3 +1,5 @@
+package com.mhfs.synth
+
 class AdderGenerator : WaveformGenerator {
 
     private val generators = HashMap<String, WaveformGenerator>()
@@ -30,5 +32,5 @@ class AdderGenerator : WaveformGenerator {
         generators[linkType] = generator
     }
 
-    override fun validate() = true
+    override fun validate() = generators.all { it.value.validate() }
 }

@@ -1,4 +1,6 @@
-class SineGenerator : WaveformGenerator {
+package com.mhfs.synth
+
+class TriangleGenerator() : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
     private var lastHitTime: Double = 0.0
@@ -17,7 +19,7 @@ class SineGenerator : WaveformGenerator {
         val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
         return DoubleArray(size = resultLength) {
             val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
-            return@DoubleArray Math.sin(phase)
+            return@DoubleArray Math.abs(2*(Math.PI-phase)/Math.PI) - 1
         }
     }
 
