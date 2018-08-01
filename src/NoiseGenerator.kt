@@ -1,3 +1,5 @@
+import com.mhfs.synth.Synthesizer
+import com.mhfs.synth.WaveformGenerator
 import java.lang.Math.*
 
 class NoiseGenerator(val sequenceLength: Int): WaveformGenerator { //rec: Math.pow(2.0, 12.0).toInt()

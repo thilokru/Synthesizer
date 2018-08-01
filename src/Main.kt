@@ -1,5 +1,6 @@
 import Main.listener
 import Main.synth
+import com.mhfs.synth.Synthesizer
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -15,7 +16,7 @@ object Main {
     const val signed = true
     const val bigEndian = false
 
-    val synth = Synthesizer(AudioFormat(Main.samplesPerSecond, Main.bitDepth, Main.channels, Main.signed, Main.bigEndian))
+    val synth = Synthesizer(AudioFormat(samplesPerSecond, bitDepth, channels, signed, bigEndian))
     val listener = object : KeyListener {
 
         private val keyState = HashMap<Int, Boolean>()
@@ -81,6 +82,6 @@ fun main(args: Array<String>) {
     frame.isVisible = true
 }
 
-private operator fun Container.plusAssign(component: Component) {
+operator fun Container.plusAssign(component: Component) {
     this.add(component)
 }

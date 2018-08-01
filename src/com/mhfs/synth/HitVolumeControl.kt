@@ -1,3 +1,8 @@
+package com.mhfs.synth
+
+import com.mhfs.synth.Synthesizer
+import com.mhfs.synth.WaveformGenerator
+
 class HitVolumeControl(val attack: Float, val decayTime: Float, val stopTime: Float, val sustain: Float) : WaveformGenerator {
 
     private var lastHitTime: Double = 0.0
