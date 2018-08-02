@@ -1,4 +1,5 @@
 import com.mhfs.synth.Synthesizer
+import com.mhfs.synth.WaveformGenerator
 import java.awt.event.KeyEvent
 
 object SpecialKeys {
@@ -121,31 +122,31 @@ object SpecialKeys {
     }
 
     class Chord(private val base: Int) : Handler {
-        private var wasMoll = false
-        private var wasSept = false
+
+        private val activations = HashSet<WaveformGenerator.Activation>()
 
         override fun keyDown(synthesizer: Synthesizer) {
-            Generators.getByNote(base)?.let { synthesizer.activate(it) }
-            wasMoll = isMoll
-            wasSept = isSept
-            if (wasMoll)
-                Generators.getByNote(base + 3)?.let { synthesizer.activate(it) }
+            activate(base, synthesizer)
+            if (isMoll)
+                activate(base + 3, synthesizer)
             else
-                Generators.getByNote(base + 4)?.let { synthesizer.activate(it) }
-            Generators.getByNote(base + 7)?.let { synthesizer.activate(it) }
-            if (wasSept)
-                Generators.getByNote(base + 10)?.let { synthesizer.activate(it) }
+                activate(base + 4, synthesizer)
+
+            activate(base + 7, synthesizer)
+
+            if (isSept)
+                activate(base + 10, synthesizer)
+        }
+
+        private fun activate(note: Int, synthesizer: Synthesizer) {
+            val freq = Generators.getByNote(note) ?: 0.0
+            val activation = WaveformGenerator.Activation(synthesizer, freq)
+            synthesizer.activate(activation)
+            activations += activation
         }
 
         override fun keyUp(synthesizer: Synthesizer) {
-            Generators.getByNote(base)?.release(synthesizer.getTimeStamp(), synthesizer)
-            if (wasMoll)
-                Generators.getByNote(base + 3)?.release(synthesizer.getTimeStamp(), synthesizer)
-            else
-                Generators.getByNote(base + 4)?.release(synthesizer.getTimeStamp(), synthesizer)
-            Generators.getByNote(base + 7)?.release(synthesizer.getTimeStamp(), synthesizer)
-            if (wasSept)
-                Generators.getByNote(base + 10)?.release(synthesizer.getTimeStamp(), synthesizer)
+            activations.forEach { it.releaseTime = it.synth.getTimeStamp() }
         }
 
         override fun canRegister(): Boolean {

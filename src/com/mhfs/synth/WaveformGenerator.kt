@@ -1,30 +1,25 @@
 package com.mhfs.synth
 
+/**
+ * Interface specifying generators for the synthesizer.
+ * They should be stateless, as all data should be carried within the Activation object.
+ */
 interface WaveformGenerator {
 
     /**
      * Important Note: Please generate all signals relative to the last hit time. Otherwise it will not work
      * with frequency shifting effects like vibrato.
-     * @arg timeStamp: The current time in seconds
+     * DO NOT cache results. Following Generators are encouraged to rewrite array data and should avoid allocating new arrays.
+     * @arg activation: Info about the current activation.
      * @return the amplitude of the signal at that time.
      */
-    fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray
-
-    /**
-     * Activates the generator, called when added to the synthesizer
-     */
-    fun hit(timeStamp: Double, synth: Synthesizer)
-
-    /**
-     * Deactivates the generator, called when the key was released
-     */
-    fun release(timeStamp: Double, synth: Synthesizer)
+    fun generate(activation: Activation): DoubleArray
 
     /**
      * Allows the generator to deactivate itself.
      * @return false if generator is done and can be ignored in the next cycle
      */
-    fun update(timeStamp: Double, synth: Synthesizer): Boolean
+    fun update(activation: Activation): Boolean
 
     /**
      * Allows linkage to other generators as parameters
@@ -37,4 +32,12 @@ interface WaveformGenerator {
      * @return true if all links are satisfied.
      */
     fun validate(): Boolean
+
+    class Activation(val synth: Synthesizer, val noteFrequency: Double) {
+        val hitTime = synth.getTimeStamp()
+        var vibratoActive = false
+        var lastVibratoActivationTime = 0.0
+        var releaseTime = 0.0
+        val associatedData = HashMap<String, Any>()
+    }
 }

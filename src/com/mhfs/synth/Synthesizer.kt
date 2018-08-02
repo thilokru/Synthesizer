@@ -1,17 +1,17 @@
 package com.mhfs.synth
 
 import java.nio.ByteBuffer
+import java.util.*
 import javax.sound.sampled.*
 import kotlin.concurrent.thread
 
 
-class Synthesizer(private val format: AudioFormat, private val reactionTime: Float, private val amplitude: Int) {
+class Synthesizer(private val format: AudioFormat, private val generator: WaveformGenerator, private val reactionTime: Float) {
 
     private val audioOut: SourceDataLine
-    private val activeGenerators = ArrayList<WaveformGenerator>()
+    private val currentActivations = ArrayList<WaveformGenerator.Activation>()
     private var shutdown = false
     private var timestamp = 0
-    var volumeMultiplier = 1.0
 
     var recorder = LoopRecorder()
 
@@ -24,7 +24,7 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
 
     private fun getAudioLine() = AudioSystem.getSourceDataLine(format)
 
-    constructor(format: AudioFormat) : this(format, 0.02f, Short.MAX_VALUE / 6)
+    constructor(format: AudioFormat, generator: WaveformGenerator) : this(format, generator, 0.02f)
 
     fun startup() = thread(isDaemon = true) {
         while (!shutdown) {
@@ -35,43 +35,34 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
 
     private fun writeWaveform() {
         val startTime = System.nanoTime()
-
-        val sampleCount = (format.sampleRate * reactionTime).toInt()
-        val startStamp = getTimeStamp()
-        val dT = 1.0 / format.sampleRate
-
-        val generators: List<WaveformGenerator> = activeGenerators.toList()
-        val frameData = DoubleArray(sampleCount) { _ -> 0.0 }
+        val activations: List<WaveformGenerator.Activation> = currentActivations.toList()
+        val frameData = DoubleArray(getSamplesPerFrame()) { _ -> 0.0 }
 
         recorder.update()
         recorder.trigger()
-        generators.forEach {
-            val samples = it.generate(startStamp, dT, sampleCount)
-            samples.forEachIndexed { i, d -> frameData[i] += d * amplitude * volumeMultiplier }
-            if (it.update(getTimeStamp(), this)) {
-                activeGenerators.remove(it)
+        activations.forEach {
+            val samples = generator.generate(it)
+            samples.forEachIndexed { i, d -> frameData[i] += d * Short.MAX_VALUE / 3 }
+            if (generator.update(it)) {
+                currentActivations.remove(it)
             }
         }
 
-        val byteBuf = ByteBuffer.allocate((sampleCount * (format.sampleSizeInBits / 8)))
+        val byteBuf = ByteBuffer.allocate((getSamplesPerFrame() * (format.sampleSizeInBits / 8)))
         frameData.forEach {
             val sample = it.toInt()
             byteBuf.put(sample.toByte())
             byteBuf.put((sample.shr(8)).toByte())
         }
-        timestamp += sampleCount
+        timestamp += getSamplesPerFrame()
         val diff = (System.nanoTime() - startTime) * 1E-6
         if (diff * 1E-3 > reactionTime)
             println("Warning: Generating took longer than expected. $diff ms")
         audioOut.write(byteBuf.array(), 0, byteBuf.capacity())
     }
 
-    fun activate(gen: WaveformGenerator) {
-        gen.hit(getTimeStamp(), this)
-        synchronized(activeGenerators) {
-            if (!activeGenerators.contains(gen))
-                activeGenerators += gen
-        }
+    fun activate(activation: WaveformGenerator.Activation) = synchronized(currentActivations) {
+        currentActivations += activation
     }
 
     fun shutdown() {
@@ -80,7 +71,9 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
         audioOut.close()
     }
 
-    fun getTimeStamp(): Double {
-        return (timestamp / format.sampleRate.toDouble())
-    }
+    fun getTimeStamp() = timestamp / format.sampleRate.toDouble()
+
+    fun getDT() = 1 / format.sampleRate.toDouble()
+
+    fun getSamplesPerFrame() = (format.sampleRate * reactionTime).toInt()
 }

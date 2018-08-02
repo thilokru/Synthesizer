@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent
 object Generators {
 
     private val mapping: HashMap<Int, Int> = HashMap()
-    private val tones: HashMap<Int, WaveformGenerator> = HashMap()
+    private val tones: HashMap<Int, Double> = HashMap()
     private val hsc = Math.pow(2.0, 1 / 12.0)
     private const val baseFrequency = 442.0
     var transposition = 0
@@ -18,18 +18,18 @@ object Generators {
     }
 
     init {
-        generateGenerator(baseFrequency * Math.pow(hsc, -9.0), 40)//C1
-        generateGenerator(baseFrequency * Math.pow(hsc, -8.0), 41)
-        generateGenerator(baseFrequency * Math.pow(hsc, -7.0), 42)
-        generateGenerator(baseFrequency * Math.pow(hsc, -6.0), 43)
-        generateGenerator(baseFrequency * Math.pow(hsc, -5.0), 44)
-        generateGenerator(baseFrequency * Math.pow(hsc, -4.0), 45)
-        generateGenerator(baseFrequency * Math.pow(hsc, -3.0), 46)
-        generateGenerator(baseFrequency * Math.pow(hsc, -2.0), 47)
-        generateGenerator(baseFrequency / hsc, 48)
-        generateGenerator(baseFrequency, 49)
-        generateGenerator(baseFrequency * hsc, 50)
-        generateGenerator(baseFrequency * Math.pow(hsc, 2.0), 51)//H1
+        setupFrequencies(baseFrequency * Math.pow(hsc, -9.0), 40)//C1
+        setupFrequencies(baseFrequency * Math.pow(hsc, -8.0), 41)
+        setupFrequencies(baseFrequency * Math.pow(hsc, -7.0), 42)
+        setupFrequencies(baseFrequency * Math.pow(hsc, -6.0), 43)
+        setupFrequencies(baseFrequency * Math.pow(hsc, -5.0), 44)
+        setupFrequencies(baseFrequency * Math.pow(hsc, -4.0), 45)
+        setupFrequencies(baseFrequency * Math.pow(hsc, -3.0), 46)
+        setupFrequencies(baseFrequency * Math.pow(hsc, -2.0), 47)
+        setupFrequencies(baseFrequency / hsc, 48)
+        setupFrequencies(baseFrequency, 49)
+        setupFrequencies(baseFrequency * hsc, 50)
+        setupFrequencies(baseFrequency * Math.pow(hsc, 2.0), 51)//H1
 
         mapping[KeyEvent.VK_LESS] = 28 //C
         mapping[KeyEvent.VK_A] = 29 //CIS
@@ -70,17 +70,20 @@ object Generators {
         mapping[KeyEvent.VK_ENTER] = 61 //A
     }
 
-    private fun generateGenerator(frequency: Double, noteID: Int) {
+    private fun setupFrequencies(frequency: Double, noteID: Int) {
         for (i in -2..3) {
-            tones[noteID + i * 12] = generateBeeper(frequency * Math.pow(2.0, i.toDouble()))
+            tones[noteID + i * 12] = frequency * Math.pow(2.0, i.toDouble())
         }
     }
 
-    private fun generateGuitarGenerators(frequency: Double): WaveformGenerator {
+    fun generateGuitarGenerators(): WaveformGenerator {
         val wave = AdderGenerator()
         keyboardSpectrum.forEach {
             val generator = SineGenerator()
-            generator.link("frequency", buildVibrato(ConstantGenerator(frequency * it.key), 0.001 * (hsc - 1) * frequency * it.key))
+            val frequency = VolumeControl()
+            frequency.link("waveform", FrequencyReaderGenerator())
+            frequency.link("volume", ConstantGenerator(it.key.toDouble()))
+            generator.link("frequency", frequency)
             val const = ConstantGenerator(it.value)
             val controlled = VolumeControl()
             controlled.link("volume", const)
@@ -101,11 +104,11 @@ object Generators {
         return KeyboardHitControl(KeyboardSpectrum(frequency))
     }*/
 
-    private fun generateBeeper(frequency: Double): WaveformGenerator {
-        val baseFrequency = ConstantGenerator(frequency)
+    fun generateBeeper(): WaveformGenerator {
+        val baseFrequency = FrequencyReaderGenerator()
 
         val square = SquarewaveGenerator(0.5f)
-        square.link("frequency", buildVibrato(baseFrequency, 0.001 * (hsc - 1) * frequency))
+        square.link("frequency", buildVibrato(baseFrequency))
 
         val volume = HitVolumeControl(0.01f, 0.5f, 0.1f, 0.3f)
 
@@ -116,14 +119,17 @@ object Generators {
         return mixer
     }
 
-    private fun buildVibrato(frequencyNode: WaveformGenerator, vibratoIntensity: Double, attackTime: Float = 0.5f, variationFrequency: Double = 6.0): WaveformGenerator {
+    private fun buildVibrato(frequencyNode: WaveformGenerator, attackTime: Float = 0.5f, variationFrequency: Double = 6.0): WaveformGenerator {
         val variance = SineGenerator()
         variance.link("frequency", ConstantGenerator(variationFrequency))
         val vibratoIncrease = VolumeControl()
         vibratoIncrease.link("volume", HitVolumeControl(attackTime, Float.POSITIVE_INFINITY, 0f, 0f))
         vibratoIncrease.link("waveform", variance)
         val dampenedVibrato = VolumeControl()
-        dampenedVibrato.link("volume", ConstantGenerator(vibratoIntensity))
+        val vibratoIntensity = VolumeControl()
+        vibratoIntensity.link("waveform", frequencyNode)
+        vibratoIntensity.link("volume", ConstantGenerator(0.001 * (hsc - 1)))
+        dampenedVibrato.link("volume", vibratoIntensity)
         dampenedVibrato.link("waveform", vibratoIncrease)
         val toggledVibrato = VolumeControl()
         toggledVibrato.link("volume", LogicNode { _ -> if (SpecialKeys.isVibrato) 1.0 else 0.0 })
@@ -134,11 +140,9 @@ object Generators {
         return resultingFrequency
     }
 
-    fun getByNote(note: Int): WaveformGenerator? {
-        return tones[note + transposition]
-    }
+    fun getByNote(note: Int) = tones[note + transposition]
 
-    operator fun get(keyCode: Int): WaveformGenerator? {
+    operator fun get(keyCode: Int): Double? {
         var noteID = mapping[keyCode]
         if (noteID != null) {
             noteID += transposition + if (SpecialKeys.increase) 12 else 0

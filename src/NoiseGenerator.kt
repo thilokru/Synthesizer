@@ -1,4 +1,3 @@
-import com.mhfs.synth.Synthesizer
 import com.mhfs.synth.WaveformGenerator
 import java.lang.Math.*
 
@@ -17,26 +16,18 @@ class NoiseGenerator(val sequenceLength: Int): WaveformGenerator { //rec: Math.p
 
     override fun validate() = this::frequencyFunction.isInitialized
 
-    override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
-        val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
+    override fun generate(activation: WaveformGenerator.Activation): DoubleArray {
+        val timeStamp = activation.synth.getTimeStamp()
+        val dT = activation.synth.getDT()
+        val resultLength = activation.synth.getSamplesPerFrame()
+
+        val frequencyProfile = frequencyFunction.generate(activation)
         return DoubleArray(size = resultLength) {
-            if (!active)
-                0.0
             val phase = ((timeStamp + it * dT) * frequencyProfile[it] * 2 * PI) % (2 * PI)
             val index = (sequenceLength * (phase % (2 * PI)) / (2 * PI)).toInt()
             random[index]
         }
     }
 
-    private var active = false
-
-    override fun hit(timeStamp: Double, synth: Synthesizer) {
-        this.active = true
-    }
-
-    override fun release(timeStamp: Double, synth: Synthesizer) {
-        this.active = false
-    }
-
-    override fun update(timeStamp: Double, synth: Synthesizer) = false
+    override fun update(activation: WaveformGenerator.Activation) = frequencyFunction.update(activation)
 }

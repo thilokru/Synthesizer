@@ -1,27 +1,12 @@
 package com.mhfs.synth
 
-import com.mhfs.synth.Synthesizer
-import com.mhfs.synth.WaveformGenerator
-
 class HitVolumeControl(val attack: Float, val decayTime: Float, val stopTime: Float, val sustain: Float) : WaveformGenerator {
 
-    private var lastHitTime: Double = 0.0
-    private var hit = false
-    private var lastDecayStart: Double = 0.0
     private var scheduledRelease = false
 
-    override fun hit(timeStamp: Double, synth: Synthesizer) {
-        this.hit = true
-        lastHitTime = timeStamp
-    }
-
-    override fun release(timeStamp: Double, synth: Synthesizer) {
-        lastDecayStart = timeStamp
-    }
-
-    override fun update(timeStamp: Double, synth: Synthesizer): Boolean {
-        if (scheduledRelease) {
-            scheduledRelease = false
+    override fun update(activation: WaveformGenerator.Activation): Boolean {
+        val tmp = activation.associatedData["${hashCode()}.scheduledRelease"]
+        if (tmp != null && tmp as Boolean) {
             return true
         }
         return false
@@ -33,11 +18,16 @@ class HitVolumeControl(val attack: Float, val decayTime: Float, val stopTime: Fl
         return true
     }
 
-    override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
-        return DoubleArray(resultLength) { getAmplitude(timeStamp + dT * it) }
+    override fun generate(activation: WaveformGenerator.Activation): DoubleArray {
+        val samples = activation.synth.getSamplesPerFrame()
+        val timeStamp = activation.synth.getTimeStamp()
+        val dT = activation.synth.getDT()
+        return DoubleArray(samples) { getAmplitude(timeStamp + dT * it, activation) }
     }
 
-    private fun getAmplitude(timeStamp: Double): Double {
+    private fun getAmplitude(timeStamp: Double, activation: WaveformGenerator.Activation): Double {
+        val lastDecayStart = activation.releaseTime
+        val lastHitTime = activation.hitTime
         val delta =
                 if (lastDecayStart > lastHitTime)
                     lastDecayStart - lastHitTime
@@ -48,8 +38,7 @@ class HitVolumeControl(val attack: Float, val decayTime: Float, val stopTime: Fl
         if (lastDecayStart > lastHitTime) {
             amplitude *= Math.exp(-(timeStamp - lastDecayStart) / stopTime)
             if (amplitude < 0.05) {
-                this.hit = false
-                this.scheduledRelease = true
+                activation.associatedData["${this.hashCode()}.scheduledRelease"] = true
             }
         }
         return amplitude

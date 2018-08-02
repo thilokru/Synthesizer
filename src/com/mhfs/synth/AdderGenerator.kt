@@ -4,28 +4,16 @@ class AdderGenerator : WaveformGenerator {
 
     private val generators = HashMap<String, WaveformGenerator>()
 
-    override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
+    override fun generate(activation: WaveformGenerator.Activation): DoubleArray {
         val profiles = HashMap<String, DoubleArray>()
         generators.forEach {
-            profiles[it.key] = it.value.generate(timeStamp, dT, resultLength)
+            profiles[it.key] = it.value.generate(activation)
         }
-        return DoubleArray(resultLength) { index -> profiles.values.sumByDouble { profile -> profile[index] } }
+        return DoubleArray(activation.synth.getSamplesPerFrame()) { index -> profiles.values.sumByDouble { profile -> profile[index] } }
     }
 
-    override fun hit(timeStamp: Double, synth: Synthesizer) {
-        generators.values.forEach {
-            it.hit(timeStamp, synth)
-        }
-    }
-
-    override fun release(timeStamp: Double, synth: Synthesizer) {
-        generators.values.forEach {
-            it.release(timeStamp, synth)
-        }
-    }
-
-    override fun update(timeStamp: Double, synth: Synthesizer): Boolean {
-        return generators.all { it.value.update(timeStamp, synth) }
+    override fun update(activation: WaveformGenerator.Activation): Boolean {
+        return generators.all { it.value.update(activation) }
     }
 
     override fun link(linkType: String, generator: WaveformGenerator) {

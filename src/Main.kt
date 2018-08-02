@@ -4,6 +4,7 @@ import com.mhfs.gui.LinkTerminal
 import com.mhfs.gui.LinkedTileContainer
 import com.mhfs.gui.OutputNode
 import com.mhfs.synth.Synthesizer
+import com.mhfs.synth.WaveformGenerator
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -20,30 +21,35 @@ object Main {
     const val signed = true
     const val bigEndian = false
 
-    val synth = Synthesizer(AudioFormat(samplesPerSecond, bitDepth, channels, signed, bigEndian))
+    val synth = Synthesizer(AudioFormat(samplesPerSecond, bitDepth, channels, signed, bigEndian), Generators.generateBeeper())
     val listener = object : KeyListener {
 
-        private val keyState = HashMap<Int, Boolean>()
+        private val keyState = HashMap<Int, WaveformGenerator.Activation>()
 
         override fun keyPressed(e: KeyEvent) {
             val specialHandler = SpecialKeys[e.extendedKeyCode]
-            if (specialHandler != null && (keyState[e.extendedKeyCode] != true)) {
-                keyState[e.extendedKeyCode] = true
+            if (specialHandler != null && (keyState[e.extendedKeyCode] == null)) {
+                val activation = WaveformGenerator.Activation(synth, 0.0) //Dummy
+                keyState[e.extendedKeyCode] = activation
                 specialHandler.keyDown(synth)
                 if (SpecialKeys.canRegister(e.extendedKeyCode))
                     synth.recorder.registerEvent(e)
             }
-            val generator = Generators[e.extendedKeyCode]
-            if (generator != null && (keyState[e.extendedKeyCode] != true)) {
-                keyState[e.extendedKeyCode] = true
-                synth.activate(generator)
+            val frequency = Generators[e.extendedKeyCode]
+            if (frequency != null && (keyState[e.extendedKeyCode] == null)) {
+                val activation = WaveformGenerator.Activation(synth, frequency)
+                keyState[e.extendedKeyCode] = activation
+                synth.activate(activation)
                 synth.recorder.registerEvent(e)
             }
         }
 
         override fun keyReleased(e: KeyEvent) {
-            keyState[e.extendedKeyCode] = false
-            Generators[e.extendedKeyCode]?.release(synth.getTimeStamp(), synth)
+            val activation = keyState[e.extendedKeyCode]
+            if (activation != null) {
+                activation.releaseTime = activation.synth.getTimeStamp()
+            }
+            keyState.remove(e.extendedKeyCode)
             SpecialKeys[e.extendedKeyCode]?.keyUp(synth)
             if (Generators[e.extendedKeyCode] != null || SpecialKeys.canRegister(e.extendedKeyCode))
                 synth.recorder.registerEvent(e)
@@ -78,10 +84,9 @@ fun main(args: Array<String>) {
 
     val slider = JSlider(0, 100, 100)
     slider.addChangeListener {
-        synth.volumeMultiplier = slider.value.toDouble() / slider.maximum
+        //synth.volumeMultiplier = slider.value.toDouble() / slider.maximum
     }
     slider.isFocusable = false
-    tile.add(LinkTerminal(10, isOutput = true), BorderLayout.WEST)
     tile.add(slider, BorderLayout.SOUTH)
     content += tile
 

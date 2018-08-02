@@ -3,7 +3,6 @@ package com.mhfs.synth
 class SineGenerator : WaveformGenerator {
 
     private lateinit var frequencyFunction: WaveformGenerator
-    private var lastHitTime: Double = 0.0
 
     override fun link(linkType: String, generator: WaveformGenerator) {
         if (linkType.toLowerCase() == "frequency") {
@@ -15,22 +14,17 @@ class SineGenerator : WaveformGenerator {
 
     override fun validate() = this::frequencyFunction.isInitialized
 
-    override fun generate(timeStamp: Double, dT: Double, resultLength: Int): DoubleArray {
-        val frequencyProfile = frequencyFunction.generate(timeStamp, dT, resultLength)
+    override fun generate(activation: WaveformGenerator.Activation): DoubleArray {
+        val timeStamp = activation.synth.getTimeStamp()
+        val dT = activation.synth.getDT()
+        val resultLength = activation.synth.getSamplesPerFrame()
+
+        val frequencyProfile = frequencyFunction.generate(activation)
         return DoubleArray(size = resultLength) {
-            val phase = ((timeStamp + it * dT - lastHitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
+            val phase = ((timeStamp + it * dT - activation.hitTime) * frequencyProfile[it] * 2 * Math.PI) % (2 * Math.PI)
             return@DoubleArray Math.sin(phase)
         }
     }
 
-    override fun hit(timeStamp: Double, synth: Synthesizer) {
-        this.lastHitTime = timeStamp
-        frequencyFunction.hit(timeStamp, synth)
-    }
-
-    override fun release(timeStamp: Double, synth: Synthesizer) {
-        frequencyFunction.release(timeStamp, synth)
-    }
-
-    override fun update(timeStamp: Double, synth: Synthesizer) = frequencyFunction.update(timeStamp, synth)
+    override fun update(activation: WaveformGenerator.Activation) = frequencyFunction.update(activation)
 }
