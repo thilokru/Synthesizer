@@ -1,5 +1,8 @@
 import Main.listener
 import Main.synth
+import com.mhfs.gui.LinkTerminal
+import com.mhfs.gui.LinkedTileContainer
+import com.mhfs.gui.OutputNode
 import com.mhfs.synth.Synthesizer
 import java.awt.*
 import java.awt.event.KeyEvent
@@ -8,6 +11,7 @@ import javax.sound.sampled.AudioFormat
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.JSlider
+import javax.swing.border.Border
 
 object Main {
     const val bitDepth = 16
@@ -66,15 +70,22 @@ fun main(args: Array<String>) {
         return@addKeyEventDispatcher false
     }
 
-    val content = JPanel()
-    content.layout = FlowLayout()
+    val content = LinkedTileContainer()
+
+    val tile = JPanel()
+    tile.setBounds(100, 100, 150, 200)
+    tile.layout = BorderLayout()
 
     val slider = JSlider(0, 100, 100)
     slider.addChangeListener {
         synth.volumeMultiplier = slider.value.toDouble() / slider.maximum
     }
     slider.isFocusable = false
-    content += slider
+    tile.add(LinkTerminal(10, isOutput = true), BorderLayout.WEST)
+    tile.add(slider, BorderLayout.SOUTH)
+    content += tile
+
+    content += OutputNode()
 
     frame.contentPane = content
     frame.focusTraversalKeysEnabled = false
