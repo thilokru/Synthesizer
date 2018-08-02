@@ -108,19 +108,19 @@ class LinkedTileContainer : JPanel(), MouseInputListener {
                 }
             }
             g2d.color = Color.LIGHT_GRAY
-            g2d.stroke = BasicStroke(5F, CAP_ROUND, JOIN_ROUND)
+            g2d.stroke = BasicStroke(10F, CAP_ROUND, JOIN_ROUND)
             draw()
 
             g2d.color = Color.DARK_GRAY
-            g2d.stroke = BasicStroke(2F, CAP_ROUND, JOIN_ROUND)
+            g2d.stroke = BasicStroke(4F, CAP_ROUND, JOIN_ROUND)
             draw()
         } else {
             g2d.color = Color.LIGHT_GRAY
-            g2d.stroke = BasicStroke(5F, CAP_ROUND, JOIN_ROUND)
+            g2d.stroke = BasicStroke(10F, CAP_ROUND, JOIN_ROUND)
             g2d.drawLine(x1, y1, x2, y2)
 
             g2d.color = Color.DARK_GRAY
-            g2d.stroke = BasicStroke(2F, CAP_ROUND, JOIN_ROUND)
+            g2d.stroke = BasicStroke(4F, CAP_ROUND, JOIN_ROUND)
             g2d.drawLine(x1, y1, x2, y2)
         }
     }

@@ -1,9 +1,10 @@
 package com.mhfs.gui
 
 import java.awt.*
+import java.util.function.Consumer
 import javax.swing.JButton
 
-class LinkTerminal(sideLength: Int, val isOutput: Boolean = false) : JButton("") {
+class LinkTerminal(private val linkChangeCallback: Consumer<Node>, private val owner: Node, sideLength: Int = 5, val isOutput: Boolean = false) : JButton(" ") {
 
     companion object {
         var previousLinkElement: LinkTerminal? = null
@@ -22,9 +23,11 @@ class LinkTerminal(sideLength: Int, val isOutput: Boolean = false) : JButton("")
                 val foreign: LinkTerminal = previousLinkElement as LinkTerminal
                 if (this.isOutput && !foreign.isOutput) {
                     foreign.endPoint = this
+                    foreign.linkChangeCallback.accept(this.owner)
                     previousLinkElement = null
                 } else if (!this.isOutput && foreign.isOutput) {
                     this.endPoint = foreign
+                    this.linkChangeCallback.accept(foreign.owner)
                     previousLinkElement = null
                 }
             }
