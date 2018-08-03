@@ -11,5 +11,5 @@ class HitVolumeControlNode : Node("Hit Volume") {
 
     override fun buildAndLink() = HitVolumeControl(attackTime.toFloat(), decayTime.toFloat(), stopTime.toFloat(), sustain.toFloat())
 
-    private fun JFormattedTextField.toFloat() = this.text.toFloat()
+    private fun JFormattedTextField.toFloat(): Float = (this.value as Number).toFloat()
 }
