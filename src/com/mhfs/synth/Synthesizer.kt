@@ -6,7 +6,7 @@ import javax.sound.sampled.*
 import kotlin.concurrent.thread
 
 
-class Synthesizer(private val format: AudioFormat, private val generator: WaveformGenerator, private val reactionTime: Float) {
+class Synthesizer(private val format: AudioFormat, private var generator: WaveformGenerator, private val reactionTime: Float) {
 
     private val audioOut: SourceDataLine
     private val currentActivations = ArrayList<WaveformGenerator.Activation>()
@@ -63,6 +63,11 @@ class Synthesizer(private val format: AudioFormat, private val generator: Wavefo
 
     fun activate(activation: WaveformGenerator.Activation) = synchronized(currentActivations) {
         currentActivations += activation
+    }
+
+    fun changeGenerator(generator: WaveformGenerator) {
+        this.currentActivations.clear()
+        this.generator = generator
     }
 
     fun shutdown() {

@@ -1,17 +1,13 @@
 import Main.listener
 import Main.synth
-import com.mhfs.gui.LinkTerminal
-import com.mhfs.gui.LinkedTileContainer
-import com.mhfs.gui.OutputNode
+import com.mhfs.gui.*
 import com.mhfs.synth.Synthesizer
 import com.mhfs.synth.WaveformGenerator
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import javax.sound.sampled.AudioFormat
-import javax.swing.JFrame
-import javax.swing.JPanel
-import javax.swing.JSlider
+import javax.swing.*
 import javax.swing.border.Border
 
 object Main {
@@ -77,25 +73,31 @@ fun main(args: Array<String>) {
     }
 
     val content = LinkedTileContainer()
+    val contextMenu = JPopupMenu()
+    contextMenu += createItem(content, "New Constant Node", ::ConstantNode)
+    contextMenu += createItem(content, "New Squarewave Node", ::SquarewaveGeneratorNode)
+    contextMenu += createItem(content, "New Frequency Node", ::FreqeuncyNode)
+    contextMenu += createItem(content, "New Volume Node", ::VolumeNode)
+    contextMenu += createItem(content, "New Hit Volume Control Node", ::HitVolumeControlNode)
+    content.componentPopupMenu = contextMenu
 
-    val tile = JPanel()
-    tile.setBounds(100, 100, 150, 200)
-    tile.layout = BorderLayout()
-
-    val slider = JSlider(0, 100, 100)
-    slider.addChangeListener {
-        //synth.volumeMultiplier = slider.value.toDouble() / slider.maximum
-    }
-    slider.isFocusable = false
-    tile.add(slider, BorderLayout.SOUTH)
-    content += tile
-
-    content += OutputNode()
+    content += OutputNode(synth)
 
     frame.contentPane = content
     frame.focusTraversalKeysEnabled = false
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     frame.isVisible = true
+}
+
+private fun createItem(content: LinkedTileContainer, text: String, action: () -> Node): JMenuItem {
+    val item = JMenuItem(text)
+    item.addActionListener {
+        val addition = action()
+        content.add(addition)
+        content.revalidate()
+        addition.repaint()
+    }
+    return item
 }
 
 operator fun Container.plusAssign(component: Component) {
