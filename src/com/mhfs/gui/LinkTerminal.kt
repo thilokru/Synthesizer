@@ -15,6 +15,8 @@ class LinkTerminal(private val linkChangeCallback: Consumer<Node>, private val o
     init {
         this.size = Dimension(sideLength, sideLength)
         this.addActionListener {
+            this.endPoint?.endPoint = null
+            this.endPoint = null
             if (previousLinkElement == null) { //We are the first element to be clicked
                 LinkTerminal.previousLinkElement = this
             } else if (previousLinkElement == this) { //User aborted
@@ -56,9 +58,9 @@ class LinkTerminal(private val linkChangeCallback: Consumer<Node>, private val o
                     return loc
                 }
 
-                override fun getEnd(): Point {
-                    val loc = endPoint!!.locationOnScreen
-                    loc.translate(endPoint!!.width / 2, endPoint!!.height / 2)
+                override fun getEnd(): Point? {
+                    val loc = endPoint?.locationOnScreen ?: null
+                    loc?.translate(endPoint!!.width / 2, endPoint!!.height / 2)
                     return loc
                 }
             })

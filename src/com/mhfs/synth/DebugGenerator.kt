@@ -1,6 +1,6 @@
 package com.mhfs.synth
 
-class DebugNode: WaveformGenerator {
+class DebugGenerator: WaveformGenerator {
 
     private lateinit var parentNode: WaveformGenerator
 

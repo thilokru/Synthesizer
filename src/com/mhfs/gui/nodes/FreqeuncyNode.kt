@@ -1,5 +1,6 @@
-package com.mhfs.gui
+package com.mhfs.gui.nodes
 
+import com.mhfs.gui.Node
 import com.mhfs.synth.FrequencyReaderGenerator
 
 class FreqeuncyNode : Node("Frequency") {

@@ -85,7 +85,9 @@ class LinkedTileContainer : JPanel(), MouseInputListener {
         val absX = this.locationOnScreen.x
         val absY = this.locationOnScreen.y
         scheduledLinks.forEach {
-            paintLink(it.getStart().x - absX, it.getStart().y - absY, it.getEnd().x - absX, it.getEnd().y - absY, g as Graphics2D)
+            val s = it.getStart()
+            val e = it.getEnd() ?: return@forEach
+            paintLink(s.x - absX, s.y - absY, e.x - absX, e.y - absY, g as Graphics2D)
         }
         scheduledLinks.clear()
         //Now paint the children over the links and background
@@ -169,6 +171,6 @@ class LinkedTileContainer : JPanel(), MouseInputListener {
         /**
          * Return absolute end position
          */
-        fun getEnd(): Point
+        fun getEnd(): Point?
     }
 }

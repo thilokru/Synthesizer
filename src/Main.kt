@@ -1,6 +1,7 @@
 import Main.listener
 import Main.synth
 import com.mhfs.gui.*
+import com.mhfs.gui.nodes.*
 import com.mhfs.synth.Synthesizer
 import com.mhfs.synth.WaveformGenerator
 import java.awt.*
@@ -8,7 +9,6 @@ import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import javax.sound.sampled.AudioFormat
 import javax.swing.*
-import javax.swing.border.Border
 
 object Main {
     const val bitDepth = 16
@@ -75,10 +75,21 @@ fun main(args: Array<String>) {
     val content = LinkedTileContainer()
     val contextMenu = JPopupMenu()
     contextMenu += createItem(content, "New Constant Node", ::ConstantNode)
+    contextMenu += createItem(content, "New Adder Node", ::AdderNode)
+    contextMenu += createItem(content, "New Debug Node", ::DebugNode)
+
+    contextMenu += JPopupMenu.Separator()
+
     contextMenu += createItem(content, "New Squarewave Node", ::SquarewaveGeneratorNode)
+    contextMenu += createItem(content, "New Triangle Node", ::TriangleNode)
+    contextMenu += createItem(content, "New Sine Node", ::SineNode)
+
+    contextMenu += JPopupMenu.Separator()
+
     contextMenu += createItem(content, "New Frequency Node", ::FreqeuncyNode)
     contextMenu += createItem(content, "New Volume Node", ::VolumeNode)
     contextMenu += createItem(content, "New Hit Volume Control Node", ::HitVolumeControlNode)
+
     content.componentPopupMenu = contextMenu
 
     content += OutputNode(synth)
