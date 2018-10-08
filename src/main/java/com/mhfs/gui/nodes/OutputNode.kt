@@ -1,18 +1,18 @@
 package com.mhfs.gui.nodes
 
 import com.mhfs.gui.Node
-import com.mhfs.synth.Synthesizer
 import com.mhfs.synth.WaveformGenerator
+import java.util.function.Consumer
 import javax.swing.JButton
 
 
-class OutputNode(private val synthesizer: Synthesizer) : Node("Synthesizer Output", hasOutput = false) {
+class OutputNode(private val updater: Consumer<WaveformGenerator>) : Node("Synthesizer Output", hasOutput = false) {
 
     init {
         createInput("input", "Audio Data")
         val buildButton = JButton("Build")
         buildButton.addActionListener {
-            synthesizer.changeGenerator(this.buildAndLink())
+            updater.accept(this.buildAndLink())
         }
         this.add(buildButton)
     }

@@ -76,7 +76,7 @@ object Generators {
         }
     }
 
-    fun generateGuitarGenerators(): WaveformGenerator {
+    /*fun generateGuitarGenerators(): WaveformGenerator {
         val wave = AdderGenerator()
         keyboardSpectrum.forEach {
             val generator = SineGenerator()
@@ -98,13 +98,13 @@ object Generators {
         mixer.link("waveform", wave)
 
         return mixer
-    }
+    }*/
 
     /*private fun generateKeyboardGenerators(frequency: Double): com.mhfs.synth.WaveformGenerator {
         return KeyboardHitControl(KeyboardSpectrum(frequency))
     }*/
 
-    fun generateBeeper(): WaveformGenerator {
+    /*fun generateBeeper(): WaveformGenerator {
         val baseFrequency = FrequencyReaderGenerator()
 
         val square = SquarewaveGenerator(0.5f)
@@ -117,9 +117,9 @@ object Generators {
         mixer.link("waveform", square)
 
         return mixer
-    }
+    }*/
 
-    private fun buildVibrato(frequencyNode: WaveformGenerator, attackTime: Float = 0.5f, variationFrequency: Double = 6.0): WaveformGenerator {
+    /*private fun buildVibrato(frequencyNode: WaveformGenerator, attackTime: Float = 0.5f, variationFrequency: Double = 6.0): WaveformGenerator {
         val variance = SineGenerator()
         variance.link("frequency", ConstantGenerator(variationFrequency))
         val vibratoIncrease = VolumeControl()
@@ -138,7 +138,7 @@ object Generators {
         resultingFrequency.link("input1", frequencyNode)
         resultingFrequency.link("input2", toggledVibrato)
         return resultingFrequency
-    }
+    }*/
 
     fun getByNote(note: Int) = tones[note + transposition]
 

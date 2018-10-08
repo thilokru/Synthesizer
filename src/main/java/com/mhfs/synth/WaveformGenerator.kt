@@ -33,7 +33,7 @@ interface WaveformGenerator {
      */
     fun validate(): Boolean
 
-    class Activation(val synth: Synthesizer, val noteFrequency: Double) {
+    class Activation(val synth: Synthesizer, val noteFrequency: Double, val generator: WaveformGenerator) {
         val hitTime = synth.getTimeStamp()
         var vibratoActive = false
         var lastVibratoActivationTime = 0.0

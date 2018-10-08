@@ -140,7 +140,7 @@ object SpecialKeys {
 
         private fun activate(note: Int, synthesizer: Synthesizer) {
             val freq = Generators.getByNote(note) ?: 0.0
-            val activation = WaveformGenerator.Activation(synthesizer, freq)
+            val activation = WaveformGenerator.Activation(synthesizer, freq, Main.generator!!)
             synthesizer.activate(activation)
             activations += activation
         }

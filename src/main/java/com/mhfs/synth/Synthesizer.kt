@@ -6,7 +6,7 @@ import javax.sound.sampled.*
 import kotlin.concurrent.thread
 
 
-class Synthesizer(private val format: AudioFormat, private var generator: WaveformGenerator, private val reactionTime: Float) {
+class Synthesizer(private val format: AudioFormat, private val reactionTime: Float) {
 
     private val audioOut: SourceDataLine
     private val currentActivations = ArrayList<WaveformGenerator.Activation>()
@@ -24,7 +24,7 @@ class Synthesizer(private val format: AudioFormat, private var generator: Wavefo
 
     private fun getAudioLine() = AudioSystem.getSourceDataLine(format)
 
-    constructor(format: AudioFormat, generator: WaveformGenerator) : this(format, generator, 0.02f)
+    constructor(format: AudioFormat) : this(format, 0.02f)
 
     fun startup() = thread(isDaemon = true) {
         while (!shutdown) {
@@ -41,9 +41,9 @@ class Synthesizer(private val format: AudioFormat, private var generator: Wavefo
         recorder.update()
         recorder.trigger()
         activations.forEach {
-            val samples = generator.generate(it)
+            val samples = it.generator.generate(it)
             samples.forEachIndexed { i, d -> frameData[i] += d * Short.MAX_VALUE / 3 }
-            if (generator.update(it)) {
+            if (it.generator.update(it)) {
                 currentActivations.remove(it)
             }
         }
@@ -63,11 +63,6 @@ class Synthesizer(private val format: AudioFormat, private var generator: Wavefo
 
     fun activate(activation: WaveformGenerator.Activation) = synchronized(currentActivations) {
         currentActivations += activation
-    }
-
-    fun changeGenerator(generator: WaveformGenerator) {
-        this.currentActivations.clear()
-        this.generator = generator
     }
 
     fun shutdown() {

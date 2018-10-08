@@ -85,9 +85,14 @@ class LinkedTileContainer : JPanel(), MouseInputListener {
         val absX = this.locationOnScreen.x
         val absY = this.locationOnScreen.y
         scheduledLinks.forEach {
-            val s = it.getStart()
-            val e = it.getEnd() ?: return@forEach
-            paintLink(s.x - absX, s.y - absY, e.x - absX, e.y - absY, g as Graphics2D)
+            try {
+                val s = it.getStart()
+                val e: Point = it.getEnd() ?: return@forEach
+                paintLink(s.x - absX, s.y - absY, e.x - absX, e.y - absY, g as Graphics2D)
+            } catch (e: IllegalComponentStateException) {
+                //One of the terminals was removed from the gui. Will not be called again, therefore
+                //can be safely ignored.
+            }
         }
         scheduledLinks.clear()
         //Now paint the children over the links and background

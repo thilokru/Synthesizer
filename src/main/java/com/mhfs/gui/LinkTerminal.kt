@@ -4,7 +4,7 @@ import java.awt.*
 import java.util.function.Consumer
 import javax.swing.JButton
 
-class LinkTerminal(private val linkChangeCallback: Consumer<Node>, private val owner: Node, sideLength: Int = 5, val isOutput: Boolean = false) : JButton(" ") {
+class LinkTerminal(private val linkChangeCallback: Consumer<Node?>, private val owner: Node, sideLength: Int = 5, val isOutput: Boolean = false) : JButton(" ") {
 
     companion object {
         var previousLinkElement: LinkTerminal? = null
@@ -36,6 +36,14 @@ class LinkTerminal(private val linkChangeCallback: Consumer<Node>, private val o
         }
     }
 
+    fun disconnect() {
+        if (endPoint != null) {
+            endPoint!!.linkChangeCallback.accept(null)
+            endPoint!!.endPoint = null
+            this.endPoint = null
+        }
+    }
+
     override fun paint(g: Graphics) {
         super.paint(g)
         if (previousLinkElement == this) {
@@ -59,7 +67,7 @@ class LinkTerminal(private val linkChangeCallback: Consumer<Node>, private val o
                 }
 
                 override fun getEnd(): Point? {
-                    val loc = endPoint?.locationOnScreen ?: null
+                    val loc = endPoint?.locationOnScreen
                     loc?.translate(endPoint!!.width / 2, endPoint!!.height / 2)
                     return loc
                 }

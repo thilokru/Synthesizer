@@ -9,15 +9,13 @@ class SquarewaveGeneratorNode : Node("Squarewave") {
 
     init {
         createInput("frequency", "Frequency")
+        createNumberInput("highTime", "High time:")
     }
 
-    private val highTime = createNumberInput("High time:")
-
     override fun buildAndLink(): WaveformGenerator {
-        val generator = SquarewaveGenerator(highTime.toFloat())
+        val generator = SquarewaveGenerator()
+        generator.link("highTime", this.getLink("highTime")!!.buildAndLink())
         generator.link("frequency", this.getLink("frequency")!!.buildAndLink())
         return generator
     }
-
-    private fun JFormattedTextField.toFloat(): Float = (this.value as Number).toFloat()
 }

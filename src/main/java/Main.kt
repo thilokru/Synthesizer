@@ -7,6 +7,7 @@ import com.mhfs.synth.WaveformGenerator
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
+import java.util.function.Consumer
 import javax.sound.sampled.AudioFormat
 import javax.swing.*
 
@@ -17,23 +18,24 @@ object Main {
     const val signed = true
     const val bigEndian = false
 
-    val synth = Synthesizer(AudioFormat(samplesPerSecond, bitDepth, channels, signed, bigEndian), Generators.generateBeeper())
+    val synth = Synthesizer(AudioFormat(samplesPerSecond, bitDepth, channels, signed, bigEndian))
+    var generator: WaveformGenerator? = null
     val listener = object : KeyListener {
 
         private val keyState = HashMap<Int, WaveformGenerator.Activation>()
 
         override fun keyPressed(e: KeyEvent) {
             val specialHandler = SpecialKeys[e.extendedKeyCode]
-            if (specialHandler != null && (keyState[e.extendedKeyCode] == null)) {
-                val activation = WaveformGenerator.Activation(synth, 0.0) //Dummy
+            if (specialHandler != null && (keyState[e.extendedKeyCode] == null) && generator != null) {
+                val activation = WaveformGenerator.Activation(synth, 0.0, generator!!) //Dummy
                 keyState[e.extendedKeyCode] = activation
                 specialHandler.keyDown(synth)
                 if (SpecialKeys.canRegister(e.extendedKeyCode))
                     synth.recorder.registerEvent(e)
             }
             val frequency = Generators[e.extendedKeyCode]
-            if (frequency != null && (keyState[e.extendedKeyCode] == null)) {
-                val activation = WaveformGenerator.Activation(synth, frequency)
+            if (frequency != null && (keyState[e.extendedKeyCode] == null) && generator != null) {
+                val activation = WaveformGenerator.Activation(synth, frequency, generator!!)
                 keyState[e.extendedKeyCode] = activation
                 synth.activate(activation)
                 synth.recorder.registerEvent(e)
@@ -74,9 +76,11 @@ fun main(args: Array<String>) {
 
     val content = LinkedTileContainer()
     val contextMenu = JPopupMenu()
-    contextMenu += createItem(content, "New Constant Node", ::ConstantNode)
     contextMenu += createItem(content, "New Adder Node", ::AdderNode)
     contextMenu += createItem(content, "New Debug Node", ::DebugNode)
+    contextMenu += createItem(content, "New Output Node") { OutputNode(Consumer {
+        Main.generator = it
+    })}
 
     contextMenu += JPopupMenu.Separator()
 
@@ -91,8 +95,6 @@ fun main(args: Array<String>) {
     contextMenu += createItem(content, "New Hit Volume Control Node", ::HitVolumeControlNode)
 
     content.componentPopupMenu = contextMenu
-
-    content += OutputNode(synth)
 
     frame.contentPane = content
     frame.focusTraversalKeysEnabled = false
