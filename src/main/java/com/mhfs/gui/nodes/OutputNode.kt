@@ -14,7 +14,7 @@ class OutputNode(private val updater: Consumer<WaveformGenerator>) : Node("Synth
         buildButton.addActionListener {
             updater.accept(this.buildAndLink())
         }
-        this.add(buildButton)
+        content.add(buildButton)
     }
 
     override fun buildAndLink(): WaveformGenerator {

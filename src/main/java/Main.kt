@@ -91,6 +91,7 @@ fun main(args: Array<String>) {
     contextMenu += JPopupMenu.Separator()
 
     contextMenu += createItem(content, "New Frequency Node", ::FreqeuncyNode)
+    contextMenu += createItem(content, "New Variable Node", ::VariableNode)
     contextMenu += createItem(content, "New Volume Node", ::VolumeNode)
     contextMenu += createItem(content, "New Hit Volume Control Node", ::HitVolumeControlNode)
 

@@ -2,13 +2,12 @@ package com.mhfs.gui
 
 import com.mhfs.synth.ConstantGenerator
 import com.mhfs.synth.WaveformGenerator
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.FlowLayout
-import java.awt.GridLayout
+import java.awt.*
 import java.text.NumberFormat
 import java.util.function.Consumer
 import javax.swing.*
+import javax.swing.border.BevelBorder
+import javax.swing.plaf.basic.BasicBorders
 
 abstract class Node(title: String, hasOutput: Boolean = true) : JPanel() {
 
@@ -16,26 +15,38 @@ abstract class Node(title: String, hasOutput: Boolean = true) : JPanel() {
     private val fieldVariables = HashMap<String, JFormattedTextField>()
     private val terminals: MutableList<LinkTerminal> = ArrayList()
 
+    protected val content = JPanel()
+
     init {
-        this.layout = GridLayout(0, 1)
         this.size = Dimension(200, 250)
+        this.layout = BorderLayout()
         val headerPanel = JPanel()
         headerPanel.layout = BorderLayout()
-        headerPanel.add(JLabel(title), BorderLayout.CENTER)
+
+        val label = JLabel(title)
+        headerPanel.add(label, BorderLayout.CENTER)
+
         val removeButton = JButton("X")
         removeButton.addActionListener {
             terminals.forEach {
                 it.disconnect()
             }
+            val formerParent = this.parent
             this.parent.remove(this)
+            formerParent.repaint()
         }
         headerPanel.add(removeButton, BorderLayout.EAST)
-        this.add(headerPanel)
+        headerPanel.size.height = removeButton.preferredSize.height
+        this.add(headerPanel, BorderLayout.NORTH)
+
+        content.layout = BoxLayout(content, BoxLayout.PAGE_AXIS)
+        content.border = BorderFactory.createLoweredSoftBevelBorder()
+        this.add(content, BorderLayout.CENTER)
         if (hasOutput) createOutput()
     }
 
     fun createInput(connectionID: String, connectionName: String) {
-        this.add(createInput0(connectionID, connectionName))
+        content.add(createInput0(connectionID, connectionName))
     }
 
     private fun createInput0(connectionID: String, connectionName: String): JPanel {
@@ -55,7 +66,7 @@ abstract class Node(title: String, hasOutput: Boolean = true) : JPanel() {
         node.add(JLabel("Output"))
         val terminal = LinkTerminal(LinkChangeCallbackImpl(this, "output"), this, isOutput = true)
         node.add(terminal)
-        this.add(node)
+        content.add(node)
         this.terminals += terminal
     }
 
@@ -69,16 +80,17 @@ abstract class Node(title: String, hasOutput: Boolean = true) : JPanel() {
         panel.layout = FlowLayout(FlowLayout.LEADING)
         panel.add(link)
         panel.add(value)
-        this.add(panel)
+        content.add(panel)
     }
 
     fun createTextInput(title: String): JTextField {
         val panel = JPanel()
         val value = JTextField()
+        value.minimumSize.width = 100
         panel.layout = FlowLayout(FlowLayout.LEADING)
         panel.add(JLabel(title))
         panel.add(value)
-        this.add(panel)
+        content.add(panel)
         return value
     }
 
