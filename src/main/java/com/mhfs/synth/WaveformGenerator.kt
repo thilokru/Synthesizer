@@ -1,10 +1,12 @@
 package com.mhfs.synth
 
+import java.io.Serializable
+
 /**
  * Interface specifying generators for the synthesizer.
  * They should be stateless, as all data should be carried within the Activation object.
  */
-interface WaveformGenerator {
+interface WaveformGenerator: Serializable {
 
     /**
      * Important Note: Please generate all signals relative to the last hit time. Otherwise it will not work

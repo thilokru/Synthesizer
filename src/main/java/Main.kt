@@ -1,13 +1,13 @@
+import Main.generator
 import Main.listener
 import Main.synth
 import com.mhfs.gui.*
-import com.mhfs.gui.nodes.*
 import com.mhfs.synth.Synthesizer
 import com.mhfs.synth.WaveformGenerator
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
-import java.util.function.Consumer
+import java.io.*
 import javax.sound.sampled.AudioFormat
 import javax.swing.*
 
@@ -63,7 +63,7 @@ fun main(args: Array<String>) {
     synth.startup()
     Runtime.getRuntime().addShutdownHook(Thread(synth::shutdown))
     val frame = JFrame("Keyboard Synth")
-    frame.size = Dimension(800, 600)
+    frame.size = Dimension(400, 50)
 
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher {
         if (it.id == KeyEvent.KEY_PRESSED) {
@@ -74,28 +74,41 @@ fun main(args: Array<String>) {
         return@addKeyEventDispatcher false
     }
 
-    val content = LinkedTileContainer()
-    val contextMenu = JPopupMenu()
-    contextMenu += createItem(content, "New Adder Node", ::AdderNode)
-    contextMenu += createItem(content, "New Debug Node", ::DebugNode)
-    contextMenu += createItem(content, "New Output Node") { OutputNode(Consumer {
-        Main.generator = it
-    })}
+    val content = JPanel()
+    content.layout = FlowLayout()
 
-    contextMenu += JPopupMenu.Separator()
+    content += button("Create Instrument") {
+        SwingUtilities.invokeLater {
+            val dialog = InstrumentCreationDialog(frame) {
+                generator = it
+            }
+            dialog.isVisible = true
+        }
+    }
 
-    contextMenu += createItem(content, "New Squarewave Node", ::SquarewaveGeneratorNode)
-    contextMenu += createItem(content, "New Triangle Node", ::TriangleNode)
-    contextMenu += createItem(content, "New Sine Node", ::SineNode)
+    content += button("Save Instrument") {
+        SwingUtilities.invokeLater {
+            val dialog = JFileChooser()
+            val state = dialog.showSaveDialog(frame)
+            if (state == JFileChooser.APPROVE_OPTION) {
+                val file = dialog.selectedFile
+                val out = ObjectOutputStream(FileOutputStream(file))
+                out.writeObject(generator)
+            }
+        }
+    }
 
-    contextMenu += JPopupMenu.Separator()
-
-    contextMenu += createItem(content, "New Frequency Node", ::FreqeuncyNode)
-    contextMenu += createItem(content, "New Variable Node", ::VariableNode)
-    contextMenu += createItem(content, "New Volume Node", ::VolumeNode)
-    contextMenu += createItem(content, "New Hit Volume Control Node", ::HitVolumeControlNode)
-
-    content.componentPopupMenu = contextMenu
+    content += button("Load Instrument") {
+        SwingUtilities.invokeLater {
+            val dialog = JFileChooser()
+            val state = dialog.showOpenDialog(frame)
+            if (state == JFileChooser.APPROVE_OPTION) {
+                val file = dialog.selectedFile
+                val input = ObjectInputStream(FileInputStream(file))
+                generator = input.readObject() as WaveformGenerator
+            }
+        }
+    }
 
     frame.contentPane = content
     frame.focusTraversalKeysEnabled = false
@@ -103,15 +116,10 @@ fun main(args: Array<String>) {
     frame.isVisible = true
 }
 
-private fun createItem(content: LinkedTileContainer, text: String, action: () -> Node): JMenuItem {
-    val item = JMenuItem(text)
-    item.addActionListener {
-        val addition = action()
-        content.add(addition)
-        content.revalidate()
-        addition.repaint()
-    }
-    return item
+fun button(title: String, actionListener: () -> Unit): Button {
+    val ret = Button(title)
+    ret.addActionListener{ actionListener() }
+    return ret
 }
 
 operator fun Container.plusAssign(component: Component) {

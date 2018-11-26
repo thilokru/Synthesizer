@@ -75,6 +75,13 @@ object SpecialKeys {
                 return true
             }
         }
+        handlers[KeyEvent.VK_F9] = object: Handler {
+            override fun keyDown(synthesizer: Synthesizer) {}
+
+            override fun keyUp(synthesizer: Synthesizer) {
+                synthesizer.reset()
+            }
+        }
         handlers[KeyEvent.VK_F10] = object : Handler {
             override fun keyDown(synthesizer: Synthesizer) {}
 

@@ -76,4 +76,6 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
     fun getDT() = 1 / format.sampleRate.toDouble()
 
     fun getSamplesPerFrame() = (format.sampleRate * reactionTime).toInt()
+
+    fun reset() = currentActivations.clear()
 }
