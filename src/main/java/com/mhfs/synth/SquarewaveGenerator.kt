@@ -2,8 +2,8 @@ package com.mhfs.synth
 
 class SquarewaveGenerator: WaveformGenerator {
 
-    private lateinit var frequencyFunction: WaveformGenerator
-    private lateinit var highTimeGenerator: WaveformGenerator
+    lateinit var frequencyFunction: WaveformGenerator
+    lateinit var highTimeGenerator: WaveformGenerator
 
     override fun link(linkType: String, generator: WaveformGenerator) {
         when (linkType) {

@@ -2,8 +2,8 @@ package com.mhfs.synth
 
 class VolumeControl : WaveformGenerator {
 
-    private lateinit var volumeFunction: WaveformGenerator
-    private lateinit var waveformFunction: WaveformGenerator
+    lateinit var volumeFunction: WaveformGenerator
+    lateinit var waveformFunction: WaveformGenerator
 
     override fun generate(activation: WaveformGenerator.Activation): DoubleArray {
         val resultLength = activation.synth.getSamplesPerFrame()

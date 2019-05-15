@@ -2,7 +2,7 @@ package com.mhfs.synth
 
 class AdderGenerator : WaveformGenerator {
 
-    private val generators = HashMap<String, WaveformGenerator>()
+    val generators = HashMap<String, WaveformGenerator>()
 
     override fun generate(activation: WaveformGenerator.Activation): DoubleArray {
         val profiles = HashMap<String, DoubleArray>()

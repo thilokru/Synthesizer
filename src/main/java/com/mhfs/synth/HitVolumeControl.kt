@@ -1,11 +1,11 @@
 package com.mhfs.synth
 
-class HitVolumeControl: WaveformGenerator {
+class HitVolumeControl : WaveformGenerator {
 
-    private lateinit var attackGenerator: WaveformGenerator
-    private lateinit var decayGenerator: WaveformGenerator
-    private lateinit var stopGenerator: WaveformGenerator
-    private lateinit var sustainGenerator: WaveformGenerator
+    lateinit var attackGenerator: WaveformGenerator
+    lateinit var decayGenerator: WaveformGenerator
+    lateinit var stopGenerator: WaveformGenerator
+    lateinit var sustainGenerator: WaveformGenerator
 
     override fun update(activation: WaveformGenerator.Activation): Boolean {
         val tmp = activation.associatedData["${hashCode()}.scheduledRelease"]
@@ -41,21 +41,27 @@ class HitVolumeControl: WaveformGenerator {
 
     private fun getAmplitude(timeStamp: Double, activation: WaveformGenerator.Activation, attack: Double,
                              decay: Double, stop: Double, sustain: Double): Double {
-        val lastDecayStart = activation.releaseTime
-        val lastHitTime = activation.hitTime
-        val delta =
-                if (lastDecayStart > lastHitTime)
-                    lastDecayStart - lastHitTime
-                else
-                    timeStamp - lastHitTime
+        try {
+            val lastDecayStart = activation.releaseTime
+            val lastHitTime = activation.hitTime
+            val tHit = if (lastHitTime > lastDecayStart) timeStamp - lastHitTime else lastDecayStart - lastHitTime
 
-        var amplitude = (1 - Math.exp(-delta / attack)) * (sustain + (1 - sustain) * Math.exp(-delta / decay))
-        if (lastDecayStart > lastHitTime) {
-            amplitude *= Math.exp(-(timeStamp - lastDecayStart) / stop)
-            if (amplitude < 0.05) {
-                activation.associatedData["${this.hashCode()}.scheduledRelease"] = true
+            var amplitude =
+                    if (tHit < attack) {
+                        1.0 - (tHit / attack - 1) * (tHit / attack - 1)
+                    } else {
+                        sustain + (1 - sustain) * Math.exp(-(tHit - attack) / decay)
+                    }
+            if (lastDecayStart > lastHitTime) {
+                amplitude *= Math.exp(-(timeStamp - lastDecayStart) / stop)
+                if (amplitude < 0.05) {
+                    activation.associatedData["${this.hashCode()}.scheduledRelease"] = true
+                }
             }
+            return amplitude
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return 1.0
         }
-        return amplitude
     }
 }

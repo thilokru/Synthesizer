@@ -1,6 +1,7 @@
 import Main.generator
 import Main.listener
 import Main.synth
+import com.mhfs.dsl.*
 import com.mhfs.gui.*
 import com.mhfs.synth.Synthesizer
 import com.mhfs.synth.WaveformGenerator
@@ -107,6 +108,19 @@ fun main(args: Array<String>) {
                 val input = ObjectInputStream(FileInputStream(file))
                 generator = input.readObject() as WaveformGenerator
             }
+        }
+    }
+
+    generator = volume {
+        volumeFunction = volumeControl {
+            attackGenerator = constant(0.02)
+            decayGenerator = constant(3.0)
+            stopGenerator = constant(0.1)
+            sustainGenerator = constant(0.3)
+        }
+        waveformFunction = squarewave {
+            frequencyFunction = frequency()
+            highTimeGenerator = constant(0.5)
         }
     }
 

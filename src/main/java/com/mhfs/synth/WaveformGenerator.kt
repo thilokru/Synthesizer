@@ -30,6 +30,8 @@ interface WaveformGenerator: Serializable {
      */
     fun link(linkType: String, generator: WaveformGenerator)
 
+    operator fun set(key: String, value: WaveformGenerator) = link(key, value)
+
     /**
      * @return true if all links are satisfied.
      */
