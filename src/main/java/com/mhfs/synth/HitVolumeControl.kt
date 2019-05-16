@@ -33,9 +33,9 @@ class HitVolumeControl : WaveformGenerator {
         val timeStamp = activation.synth.getTimeStamp()
         val dT = activation.synth.getDT()
         val attack = attackGenerator.generate(activation)
-        val decay = attackGenerator.generate(activation)
-        val stop = attackGenerator.generate(activation)
-        val sustain = attackGenerator.generate(activation)
+        val decay = decayGenerator.generate(activation)
+        val stop = stopGenerator.generate(activation)
+        val sustain = sustainGenerator.generate(activation)
         return DoubleArray(samples) { getAmplitude(timeStamp + dT * it, activation, attack[it], decay[it], stop[it], sustain[it]) }
     }
 

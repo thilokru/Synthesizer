@@ -114,7 +114,7 @@ fun main(args: Array<String>) {
     generator = volume {
         volumeFunction = volumeControl {
             attackGenerator = constant(0.02)
-            decayGenerator = constant(3.0)
+            decayGenerator = constant(5.0)
             stopGenerator = constant(0.1)
             sustainGenerator = constant(0.3)
         }

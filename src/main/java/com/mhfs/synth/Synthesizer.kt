@@ -36,13 +36,13 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
     private fun writeWaveform() {
         val startTime = System.nanoTime()
         val activations: List<WaveformGenerator.Activation> = currentActivations.toList()
-        val frameData = DoubleArray(getSamplesPerFrame()) { _ -> 0.0 }
+        val frameData = DoubleArray(getSamplesPerFrame()) { 0.0 }
 
         recorder.update()
         recorder.trigger()
         activations.forEach {
             val samples = it.generator.generate(it)
-            samples.forEachIndexed { i, d -> frameData[i] += d * Short.MAX_VALUE / 3 }
+            samples.forEachIndexed { i, d -> frameData[i] += d * Short.MAX_VALUE / 5 }
             if (it.generator.update(it)) {
                 currentActivations.remove(it)
             }
