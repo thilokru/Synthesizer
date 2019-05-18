@@ -11,3 +11,7 @@ class FrequencyReaderGenerator : WaveformGenerator {
 
     override fun validate() = true
 }
+
+fun frequency() = FrequencyReaderGenerator()
+
+fun WaveformGenerator.frequency(link: String) = link(link, frequency())

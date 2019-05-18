@@ -25,3 +25,7 @@ class DebugGenerator: WaveformGenerator {
     override fun validate() = ::parentNode.isInitialized
 
 }
+
+fun debug(block: DebugGenerator.() -> Unit) = DebugGenerator().apply(block)
+
+fun WaveformGenerator.debug(link: String, block: DebugGenerator.() -> Unit) = link(link, debug(block))

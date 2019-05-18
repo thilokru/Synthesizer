@@ -1,10 +1,8 @@
 import Main.generator
 import Main.listener
 import Main.synth
-import com.mhfs.dsl.*
 import com.mhfs.gui.*
-import com.mhfs.synth.Synthesizer
-import com.mhfs.synth.WaveformGenerator
+import com.mhfs.synth.*
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -64,7 +62,7 @@ fun main(args: Array<String>) {
     synth.startup()
     Runtime.getRuntime().addShutdownHook(Thread(synth::shutdown))
     val frame = JFrame("Keyboard Synth")
-    frame.size = Dimension(400, 50)
+    frame.size = Dimension(400, 75)
 
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher {
         if (it.id == KeyEvent.KEY_PRESSED) {
@@ -132,7 +130,7 @@ fun main(args: Array<String>) {
 
 fun button(title: String, actionListener: () -> Unit): Button {
     val ret = Button(title)
-    ret.addActionListener{ actionListener() }
+    ret.addActionListener { actionListener() }
     return ret
 }
 

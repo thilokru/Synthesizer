@@ -65,3 +65,7 @@ class HitVolumeControl : WaveformGenerator {
         }
     }
 }
+
+fun volumeControl(block: HitVolumeControl.() -> Unit) = HitVolumeControl().apply(block)
+
+fun WaveformGenerator.volumeControl(link: String, block: HitVolumeControl.() -> Unit) = link(link, volumeControl(block))

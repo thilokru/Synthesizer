@@ -9,3 +9,7 @@ class ConstantGenerator(private val value: Double) : WaveformGenerator {
 
     override fun validate() = true
 }
+
+fun constant(value: Double) = ConstantGenerator(value)
+
+fun WaveformGenerator.constant(link: String, value: Double) = link(link, constant(value))

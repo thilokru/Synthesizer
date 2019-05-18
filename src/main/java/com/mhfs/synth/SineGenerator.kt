@@ -2,7 +2,7 @@ package com.mhfs.synth
 
 class SineGenerator : WaveformGenerator {
 
-    private lateinit var frequencyFunction: WaveformGenerator
+    lateinit var frequencyFunction: WaveformGenerator
 
     override fun link(linkType: String, generator: WaveformGenerator) {
         if (linkType.toLowerCase() == "frequency") {
@@ -28,3 +28,7 @@ class SineGenerator : WaveformGenerator {
 
     override fun update(activation: WaveformGenerator.Activation) = frequencyFunction.update(activation)
 }
+
+fun sine(block: SineGenerator.() -> Unit) = SineGenerator().apply(block)
+
+fun WaveformGenerator.sine(link: String, block: SineGenerator.() -> Unit) = link(link, sine(block))

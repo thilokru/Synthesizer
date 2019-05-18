@@ -29,3 +29,7 @@ class VolumeControl : WaveformGenerator {
         return ::waveformFunction.isInitialized && ::volumeFunction.isInitialized && waveformFunction.validate() && volumeFunction.validate()
     }
 }
+
+fun volume(block: VolumeControl.() -> Unit) = VolumeControl().apply(block)
+
+fun WaveformGenerator.volume(link: String, block: VolumeControl.() -> Unit) = link(link, volume(block))

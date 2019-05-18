@@ -22,3 +22,7 @@ class AdderGenerator : WaveformGenerator {
 
     override fun validate() = generators.all { it.value.validate() }
 }
+
+fun add(block: AdderGenerator.() -> Unit) = AdderGenerator().apply(block)
+
+fun WaveformGenerator.add(link: String, block: AdderGenerator.() -> Unit) = link(link, add(block))

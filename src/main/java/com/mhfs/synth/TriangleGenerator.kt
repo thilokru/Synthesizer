@@ -2,7 +2,7 @@ package com.mhfs.synth
 
 class TriangleGenerator : WaveformGenerator {
 
-    private lateinit var frequencyFunction: WaveformGenerator
+    lateinit var frequencyFunction: WaveformGenerator
 
     override fun link(linkType: String, generator: WaveformGenerator) {
         if (linkType.toLowerCase() == "frequency") {
@@ -28,3 +28,7 @@ class TriangleGenerator : WaveformGenerator {
 
     override fun update(activation: WaveformGenerator.Activation) = frequencyFunction.update(activation)
 }
+
+fun triangle(block: TriangleGenerator.() -> Unit) = TriangleGenerator().apply(block)
+
+fun WaveformGenerator.triangle(link: String, block: TriangleGenerator.() -> Unit) = link(link, triangle(block))

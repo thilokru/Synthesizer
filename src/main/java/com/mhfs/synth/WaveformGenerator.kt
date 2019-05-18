@@ -6,7 +6,7 @@ import java.io.Serializable
  * Interface specifying generators for the synthesizer.
  * They should be stateless, as all data should be carried within the Activation object.
  */
-interface WaveformGenerator: Serializable {
+interface WaveformGenerator : Serializable {
 
     /**
      * Important Note: Please generate all signals relative to the last hit time. Otherwise it will not work
@@ -37,7 +37,8 @@ interface WaveformGenerator: Serializable {
      */
     fun validate(): Boolean
 
-    class Activation(val synth: Synthesizer, val noteFrequency: Double, val generator: WaveformGenerator) {
+    class Activation(val synth: Synthesizer, val noteFrequency: Double, val generator: WaveformGenerator,
+                     val hitStrength: Double = 1.0) {
         val hitTime = synth.getTimeStamp()
         var vibratoActive = false
         var lastVibratoActivationTime = 0.0

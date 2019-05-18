@@ -42,7 +42,7 @@ class Synthesizer(private val format: AudioFormat, private val reactionTime: Flo
         recorder.trigger()
         activations.forEach {
             val samples = it.generator.generate(it)
-            samples.forEachIndexed { i, d -> frameData[i] += d * Short.MAX_VALUE / 5 }
+            samples.forEachIndexed { i, d -> frameData[i] += d * it.hitStrength * Short.MAX_VALUE / 5 }
             if (it.generator.update(it)) {
                 currentActivations.remove(it)
             }

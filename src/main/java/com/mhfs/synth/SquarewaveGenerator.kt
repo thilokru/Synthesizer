@@ -33,3 +33,7 @@ class SquarewaveGenerator: WaveformGenerator {
 
     override fun update(activation: WaveformGenerator.Activation) = frequencyFunction.update(activation) && highTimeGenerator.update(activation)
 }
+
+fun squarewave(block: SquarewaveGenerator.() -> Unit) = SquarewaveGenerator().apply(block)
+
+fun WaveformGenerator.squarewave(link: String, block: SquarewaveGenerator.() -> Unit) = link(link, squarewave(block))
